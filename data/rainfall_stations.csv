@@ -1,0 +1,16 @@
+station_id,station_name,latitude,longitude,elevation_m,data_source
+076031,Mildura Airport,-34.235800,142.086700,50.00,bom
+077042,Swan Hill Aerodrome,-35.376000,143.537700,71.00,bom
+079100,Horsham Aerodrome,-36.669700,142.173600,134.00,bom
+081123,Bendigo Airport,-36.739500,144.329000,208.00,bom
+081125,Shepparton Airport,-36.429700,145.394100,114.00,bom
+082039,Wodonga,-36.130000,146.880000,158.00,bom
+084142,Lakes Entrance,-37.880600,147.981700,6.00,bom
+085279,Bairnsdale Airport,-37.884200,147.568400,50.00,bom
+085280,Latrobe Valley Airport,-38.207400,146.470800,56.00,bom
+086282,Melbourne Olympic Park,-37.825500,144.981600,7.50,bom
+086282-AP,Melbourne Airport,-37.665500,144.832100,113.40,bom
+087025,Geelong Racecourse,-38.164700,144.365500,4.00,bom
+087113,Avalon Airport,-38.039400,144.469400,10.60,bom
+089002,Ballarat Aerodrome,-37.511400,143.791100,435.00,bom
+090035,Warrnambool Airport,-38.296400,142.456700,71.00,bom

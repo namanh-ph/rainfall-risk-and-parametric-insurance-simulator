@@ -1,0 +1,82 @@
+# ── Python ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.Python
+build/
+dist/
+pip-wheel-metadata/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Pytest / coverage / tooling caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# ── Node / Vite ────────────────────────────────────────────────────────
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+dist/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# ── Environment files (keep .env.example) ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Database dumps ─────────────────────────────────────────────────────
+*.sql.gz
+*.dump
+*.bak
+pgdata/
+
+# ── MLflow + model artefacts ───────────────────────────────────────────
+mlruns/
+mlflow.db
+mlartifacts/
+backend/artifacts/models/
+backend/backend/
+/mlflow/
+
+# ── Generated reports ──────────────────────────────────────────────────
+backend/artifacts/reports/
+
+# ── Notebooks ──────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── OS files ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ── IDE files ──────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ── Model artefacts written to a nested path by the train_model CLI ────
+backend/backend/

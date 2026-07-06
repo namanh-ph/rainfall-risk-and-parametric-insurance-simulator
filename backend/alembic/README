@@ -1,0 +1,25 @@
+Alembic migrations for the simulator.
+
+This directory holds the PostGIS schema migrations. The
+``CREATE EXTENSION postgis`` bootstrap migration is the first migration
+in ``versions/``; it must run idempotently and is a prerequisite for
+every later migration.
+
+Generate a revision (autogenerate after model changes):
+
+    alembic revision -m "add <table>" --autogenerate
+
+Apply migrations:
+
+    alembic upgrade head
+
+Roll back to base:
+
+    alembic downgrade base
+
+Configuration notes:
+- alembic.ini ships with an empty sqlalchemy.url; env.py injects the URL
+  from Settings.DATABASE_URL at runtime so a single source of truth is
+  preserved between the FastAPI app and migration tooling.
+- target_metadata is bound to src.db.base.Base.metadata. env.py imports
+  src.db.models so autogenerate can compare model state to the live DB.

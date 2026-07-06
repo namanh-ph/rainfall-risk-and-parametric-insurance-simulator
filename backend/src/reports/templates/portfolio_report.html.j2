@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ report_title }}</title>
+<style>
+  :root {
+    --fg: #111;
+    --muted: #555;
+    --border: #d0d0d0;
+    --accent: #1c3f6e;
+    --warn-bg: #fff7e6;
+    --warn-border: #d8a64b;
+    --row-alt: #f6f8fb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--fg);
+    max-width: 1080px;
+    margin: 2rem auto;
+    padding: 0 1.5rem 4rem;
+    line-height: 1.45;
+  }
+  h1 { color: var(--accent); font-size: 1.8rem; margin: 0 0 .25rem; }
+  h2 {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: .25rem;
+    margin-top: 2.25rem;
+    font-size: 1.25rem;
+  }
+  h3 { color: var(--accent); font-size: 1.05rem; margin: 1.25rem 0 .5rem; }
+  .meta { color: var(--muted); margin-bottom: 1rem; }
+  .meta dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; margin: 0; }
+  .meta dt { font-weight: 600; color: var(--accent); }
+  .meta dd { margin: 0; }
+  .disclaimer {
+    padding: .75rem 1rem;
+    border-left: 4px solid var(--accent);
+    background: #f0f4fa;
+    font-size: .92rem;
+  }
+  .warnings {
+    border: 1px solid var(--warn-border);
+    background: var(--warn-bg);
+    padding: .75rem 1rem;
+    margin: 1.25rem 0;
+    border-radius: 4px;
+  }
+  .warnings h3 { margin-top: 0; color: #8a5a00; }
+  .warnings ul { margin: .25rem 0 0 1rem; padding: 0; }
+  .empty-note {
+    color: var(--muted);
+    font-style: italic;
+    padding: .5rem 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: .5rem 0 1.25rem;
+    font-size: .9rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: .35rem .55rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--accent); color: #fff; font-weight: 600; }
+  tr:nth-child(even) td { background: var(--row-alt); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: .75rem;
+    margin: .5rem 0 1rem;
+  }
+  .kpi {
+    border: 1px solid var(--border);
+    padding: .6rem .75rem;
+    border-radius: 4px;
+    background: #fff;
+  }
+  .kpi .label { color: var(--muted); font-size: .82rem; }
+  .kpi .value { font-size: 1.15rem; font-weight: 600; color: var(--accent); }
+  .band-Low { background: #e3f1d9; }
+  .band-Medium { background: #fff4cc; }
+  .band-High { background: #ffd9b3; }
+  .band-Severe { background: #ffb3b3; }
+  .small { color: var(--muted); font-size: .85rem; }
+  .methodology-section { margin-bottom: .75rem; }
+  .methodology-section p { margin: .25rem 0; }
+  @media print {
+    body { margin: 0; max-width: none; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    th { color: #000; background: #ddd; }
+    .warnings { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>{{ report_title }}</h1>
+  <div class="meta">
+    <dl>
+      <dt>Report ID</dt><dd>{{ report_id }}</dd>
+      <dt>Generated</dt><dd>{{ generated_at|isodate }}</dd>
+      <dt>As-of date</dt><dd>{{ as_of_date|isodate }}</dd>
+      <dt>Simulation</dt><dd>{{ simulation_id }}</dd>
+      <dt>Model</dt><dd>{{ model_name }} / {{ model_version }}</dd>
+      <dt>Feature version</dt><dd>{{ feature_version }}</dd>
+    </dl>
+  </div>
+  <p class="disclaimer">
+    <strong>Data sources.</strong> Rainfall observations are sourced
+    from the Bureau of Meteorology. Victorian LGA boundaries are
+    sourced from the Australian Bureau of Statistics. The asset
+    portfolio is loaded from data/assets.csv.
+  </p>
+</header>
+
+{% if warnings %}
+<section class="warnings">
+  <h3>Warnings</h3>
+  <ul>
+    {% for w in warnings %}
+      <li>{{ w }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section>
+  <h2>Portfolio Summary</h2>
+  {% set ps = portfolio_summary %}
+  {% if ps and ps.total_assets %}
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Total assets</div><div class="value">{{ ps.total_assets|number(0) }}</div></div>
+      <div class="kpi"><div class="label">Total asset value</div><div class="value">{{ ps.total_asset_value|currency }}</div></div>
+      <div class="kpi"><div class="label">Total coverage limit</div><div class="value">{{ ps.total_coverage_limit|currency }}</div></div>
+      <div class="kpi"><div class="label">Average risk score</div><div class="value">{{ ps.average_risk_score|number(2) }}</div></div>
+      <div class="kpi"><div class="label">High or Severe assets</div><div class="value">{{ ps.high_or_severe_assets|number(0) }}</div></div>
+      <div class="kpi"><div class="label">Triggered assets</div><div class="value">{{ ps.triggered_assets|number(0) }}</div></div>
+      <div class="kpi"><div class="label">Total estimated payout</div><div class="value">{{ ps.total_estimated_payout|currency }}</div></div>
+      <div class="kpi"><div class="label">Average ML risk probability</div><div class="value">{{ ps.average_ml_risk_probability|number(4) }}</div></div>
+    </div>
+
+    <h3>Risk band distribution</h3>
+    {% if ps.risk_band_distribution %}
+      <table>
+        <thead>
+          <tr>
+            <th>Risk band</th>
+            <th class="num">Asset count</th>
+            <th class="num">Average risk score</th>
+            <th class="num">Total coverage limit</th>
+            <th class="num">Total estimated payout</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in ps.risk_band_distribution %}
+            <tr class="band-{{ b.risk_band }}">
+              <td>{{ b.risk_band }}</td>
+              <td class="num">{{ b.asset_count|number(0) }}</td>
+              <td class="num">{{ b.average_risk_score|number(2) }}</td>
+              <td class="num">{{ b.total_coverage_limit|currency }}</td>
+              <td class="num">{{ b.total_estimated_payout|currency }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-note">No risk-band rows available for this date / simulation.</p>
+    {% endif %}
+  {% else %}
+    <p class="empty-note">Portfolio summary is unavailable â€” no asset rows found.</p>
+  {% endif %}
+</section>
+
+{% if include_top_assets %}
+<section>
+  <h2>Top Risk Assets</h2>
+  {% if top_risk_assets %}
+    <table>
+      <thead>
+        <tr>
+          <th class="num">Rank</th>
+          <th>Asset ID</th>
+          <th>Postcode</th>
+          <th>Industry</th>
+          <th>LGA</th>
+          <th class="num">Risk score</th>
+          <th>Band</th>
+          <th class="num">ML probability</th>
+          <th class="num">ML rank</th>
+          <th>Top driver</th>
+          <th class="num">Rainfall 3d (mm)</th>
+          <th class="num">Estimated payout</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in top_risk_assets %}
+          <tr {% if r.risk_band %}class="band-{{ r.risk_band }}"{% endif %}>
+            <td class="num">{{ r.rank }}</td>
+            <td>{{ r.asset_id }}</td>
+            <td>{{ r.postcode }}</td>
+            <td>{{ r.industry }}</td>
+            <td>{{ r.lga_name or "â€”" }}</td>
+            <td class="num">{{ r.risk_score|number(2) }}</td>
+            <td>{{ r.risk_band or "â€”" }}</td>
+            <td class="num">{{ r.ml_risk_probability|number(4) }}</td>
+            <td class="num">{{ r.ml_risk_rank|number(0) }}</td>
+            <td>{{ r.top_risk_driver or "â€”" }}</td>
+            <td class="num">{{ r.rainfall_3d_mm|number(2) }}</td>
+            <td class="num">{{ r.estimated_payout|currency }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-note">No top risk assets available.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Top Payout Assets</h2>
+  {% if top_payout_assets %}
+    <table>
+      <thead>
+        <tr>
+          <th class="num">Rank</th>
+          <th>Asset ID</th>
+          <th>Postcode</th>
+          <th>Industry</th>
+          <th>LGA</th>
+          <th class="num">Rainfall 3d (mm)</th>
+          <th>Trigger status</th>
+          <th class="num">Payout rate</th>
+          <th class="num">Coverage limit</th>
+          <th class="num">Estimated payout</th>
+          <th>Risk band</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in top_payout_assets %}
+          <tr {% if r.risk_band %}class="band-{{ r.risk_band }}"{% endif %}>
+            <td class="num">{{ r.rank }}</td>
+            <td>{{ r.asset_id }}</td>
+            <td>{{ r.postcode }}</td>
+            <td>{{ r.industry }}</td>
+            <td>{{ r.lga_name or "â€”" }}</td>
+            <td class="num">{{ r.rainfall_3d_mm|number(2) }}</td>
+            <td>{{ r.trigger_status or "â€”" }}</td>
+            <td class="num">{{ r.payout_rate|number(3) }}</td>
+            <td class="num">{{ r.coverage_limit|currency }}</td>
+            <td class="num">{{ r.estimated_payout|currency }}</td>
+            <td>{{ r.risk_band or "â€”" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-note">No top payout assets available.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<section>
+  <h2>Risk by Industry</h2>
+  {% if risk_by_industry %}
+    <table>
+      <thead>
+        <tr>
+          <th>Industry</th>
+          <th class="num">Asset count</th>
+          <th class="num">Average risk score</th>
+          <th class="num">High or Severe assets</th>
+          <th class="num">Triggered assets</th>
+          <th class="num">Total coverage limit</th>
+          <th class="num">Total estimated payout</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in risk_by_industry %}
+          <tr>
+            <td>{{ r.industry }}</td>
+            <td class="num">{{ r.asset_count|number(0) }}</td>
+            <td class="num">{{ r.average_risk_score|number(2) }}</td>
+            <td class="num">{{ r.high_or_severe_assets|number(0) }}</td>
+            <td class="num">{{ r.triggered_assets|number(0) }}</td>
+            <td class="num">{{ r.total_coverage_limit|currency }}</td>
+            <td class="num">{{ r.total_estimated_payout|currency }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-note">No industry rows available.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Risk by LGA</h2>
+  {% if risk_by_lga %}
+    <table>
+      <thead>
+        <tr>
+          <th>LGA code</th>
+          <th>LGA name</th>
+          <th class="num">Asset count</th>
+          <th class="num">Average risk score</th>
+          <th class="num">High or Severe assets</th>
+          <th class="num">Triggered assets</th>
+          <th class="num">Total coverage limit</th>
+          <th class="num">Total estimated payout</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in risk_by_lga %}
+          <tr>
+            <td>{{ r.lga_code }}</td>
+            <td>{{ r.lga_name or "â€”" }}</td>
+            <td class="num">{{ r.asset_count|number(0) }}</td>
+            <td class="num">{{ r.average_risk_score|number(2) }}</td>
+            <td class="num">{{ r.high_or_severe_assets|number(0) }}</td>
+            <td class="num">{{ r.triggered_assets|number(0) }}</td>
+            <td class="num">{{ r.total_coverage_limit|currency }}</td>
+            <td class="num">{{ r.total_estimated_payout|currency }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty-note">No LGA rows available.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Model Metadata</h2>
+  {% set mm = model_metadata %}
+  {% if mm %}
+    <table>
+      <tbody>
+        <tr><th>Model name</th><td>{{ mm.model_name or "â€”" }}</td></tr>
+        <tr><th>Model version</th><td>{{ mm.model_version or "â€”" }}</td></tr>
+        <tr><th>Feature version</th><td>{{ mm.feature_version or "â€”" }}</td></tr>
+        <tr><th>Target name</th><td>{{ mm.target_name or "â€”" }}</td></tr>
+        <tr><th>Train rows</th><td>{{ mm.train_row_count|number(0) }}</td></tr>
+        <tr><th>Test rows</th><td>{{ mm.test_row_count|number(0) }}</td></tr>
+        <tr><th>Feature count</th><td>{{ mm.feature_count|number(0) }}</td></tr>
+        <tr><th>Positive rate</th><td>{{ mm.positive_rate|number(4) }}</td></tr>
+        <tr><th>MLflow run id</th><td>{{ mm.mlflow_run_id or "â€”" }}</td></tr>
+        <tr><th>Prediction count</th><td>{{ mm.prediction_count|number(0) }}</td></tr>
+        <tr><th>Artifact path</th><td>{{ mm.artifact_path or "â€”" }}</td></tr>
+      </tbody>
+    </table>
+    {% if mm.metrics %}
+      <h3>Metrics</h3>
+      <table>
+        <thead><tr><th>Metric</th><th class="num">Value</th></tr></thead>
+        <tbody>
+          {% for key, value in mm.metrics.items() %}
+            <tr><td>{{ key }}</td><td class="num">{{ value|number(4) }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="empty-note">Model metrics are not available â€” train the model to populate this section.</p>
+    {% endif %}
+  {% else %}
+    <p class="empty-note">Model metadata is unavailable.</p>
+  {% endif %}
+</section>
+
+{% if include_methodology %}
+<section>
+  <h2>Methodology</h2>
+  <p class="disclaimer">{{ methodology.data_disclaimer }}</p>
+  {% for item in methodology.sections %}
+    <div class="methodology-section">
+      <h3>{{ item.heading }}</h3>
+      <p>{{ item.body }}</p>
+    </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<footer>
+  <p class="small">
+    Rendered from persisted analytics outputs. No external JavaScript
+    or CSS dependencies are referenced.
+  </p>
+</footer>
+
+</body>
+</html>
